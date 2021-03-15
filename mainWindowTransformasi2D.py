@@ -37,6 +37,7 @@ class Ui_MainWindow(object):
     savedStep = []
     savedTransform = []
     textContent = []
+    errorState = 0
     sc = None
 
     # fungsi ui mainwindow
@@ -249,6 +250,7 @@ class Ui_MainWindow(object):
                 self.dictOfNodes['x'].append(int(x))
                 self.dictOfNodes['y'].append(int(y))
             except:
+                self.errorState = 1
                 import errorInputDialog
                 errorDialog = QtWidgets.QDialog()
                 errorDialog.setWindowTitle("Error!")
@@ -260,18 +262,19 @@ class Ui_MainWindow(object):
 
     # fungsi untuk menggambar bangun di awal (belum ditransformasi)
     def gambarAwal(self):
-        if len(self.savedStep) < 2:
+        self.getCoordinate()
+        if self.errorState == 0:
             self.savedTransform = []
-            self.getCoordinate()
+            self.savedStep = []
             self.figure.clear()
             ax = self.figure.add_subplot(111)
             ax.fill(self.dictOfNodes['x'], self.dictOfNodes['y'])
             self.canvas.draw()
             self.savedTransform.append(self.dictOfNodes)
-            self.savedStep.append('inisiasi bangun 2D awal')
             self.plainTextEdit.setReadOnly(False)
         else:
-            pass
+            self.errorState = 0
+
 
     # fungsi untuk menggambar bangun hasil transformasi
     def gambarTransformasi(self, title):
@@ -281,6 +284,7 @@ class Ui_MainWindow(object):
         ax.fill(self.savedTransform[-1]['x'], self.savedTransform[-1]['y'])
         self.canvas.draw()
         self.plainTextEdit.setReadOnly(True)
+        self.btnTampilGambar.setEnabled(False)
         self.textContent.append(self.savedStep[-1])
         result = []
         for i in range(len(self.savedTransform[-1]['x'])):
@@ -527,6 +531,7 @@ class Ui_MainWindow(object):
         self.textContent = []
         self.plainTextEdit.setPlainText("")
         self.plainTextEdit.setReadOnly(False)
+        self.btnTampilGambar.setEnabled(True)
         self.gambarAwal()
 
     # fungsi untuk menghapus transformasi-transformasi yang dilakukan
@@ -545,6 +550,7 @@ class Ui_MainWindow(object):
             self.savedStep = []
             self.gambarAwal()
             self.plainTextEdit.setReadOnly(True)
+            self.btnTampilGambar.setEnabled(False)
 
         else:
             pass
